@@ -92,8 +92,11 @@
       }
 
       // Select the first layer randomly
-      var originLayer =
-        belowLayers[Math.floor(Math.random() * belowLayers.length)];
+      var originLayer;
+      do {
+        originLayer =
+          belowLayers[Math.floor(Math.random() * belowLayers.length)];
+      } while (processedLayers.indexOf(originLayer.index) !== -1); // Keep selecting until an unprocessed layer is found
 
       // Set the first parameter "Origin" of "NODE Line" effect
       effect.property(1).setValue(originLayer.index);
@@ -101,8 +104,14 @@
       // Select the second layer with distance between minDist and maxDist to the first layer
       var destinationLayer = null;
       for (var i = 0; i < maxTries; i++) {
-        var tempLayer =
-          belowLayers[Math.floor(Math.random() * belowLayers.length)];
+        var tempLayer;
+        do {
+          tempLayer =
+            belowLayers[Math.floor(Math.random() * belowLayers.length)];
+        } while (
+          processedLayers.indexOf(tempLayer.index) !== -1 ||
+          tempLayer.index === originLayer.index
+        ); // Keep selecting until an unprocessed layer is found
 
         // Check if the distance is between minDist and maxDist
         var distance = Math.sqrt(
@@ -136,15 +145,14 @@
       effect.property(2).setValue(destinationLayer.index);
       effect.property(3).setValue(Math.round(Math.random()) + 1);
       effect.property(4).setValue(Math.round(Math.random()) + 1);
+      processedLayers.push(originLayer.index, destinationLayer.index);
     }
-
     // Select the first layer
-    var layer = app.project.activeItem.selectedLayers[0];
-    processLayer(layer);
+    processLayer(app.project.activeItem.selectedLayers[0]);
 
     // Duplicate the layer and process the duplicates
     for (var i = 0; i < duplicates; i++) {
-      var duplicateLayer = layer.duplicate();
+      var duplicateLayer = app.project.activeItem.selectedLayers[0].duplicate();
       processLayer(duplicateLayer);
     }
   }
