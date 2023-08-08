@@ -15,19 +15,19 @@
   var groupTwo = mainWindow.add("group", undefined, "groupTwo");
   groupTwo.orientation = "row";
   var maxTriesLabel = groupTwo.add("statictext", undefined, "Max Tries:");
-  var maxTriesInput = groupTwo.add("edittext", undefined, "40");
+  var maxTriesInput = groupTwo.add("edittext", undefined, "120");
   maxTriesInput.characters = 5;
 
   var groupThree = mainWindow.add("group", undefined, "groupThree");
   groupThree.orientation = "row";
   var minDistLabel = groupThree.add("statictext", undefined, "Min Distance:");
-  var minDistInput = groupThree.add("edittext", undefined, "111");
+  var minDistInput = groupThree.add("edittext", undefined, "100");
   minDistInput.characters = 5;
 
   var groupFour = mainWindow.add("group", undefined, "groupFour");
   groupFour.orientation = "row";
   var maxDistLabel = groupFour.add("statictext", undefined, "Max Distance:");
-  var maxDistInput = groupFour.add("edittext", undefined, "888");
+  var maxDistInput = groupFour.add("edittext", undefined, "600");
   maxDistInput.characters = 5;
 
   var runButton = mainWindow.add("button", undefined, "Run");
@@ -46,6 +46,7 @@
     processedLayers = [];
     processLayers(duplicates, maxTries, minDist, maxDist);
 
+    alert(processedLayers);
     app.endUndoGroup();
   };
 
@@ -100,6 +101,7 @@
 
       // Set the first parameter "Origin" of "NODE Line" effect
       effect.property(1).setValue(originLayer.index);
+      processedLayers.push(originLayer.index);
 
       // Select the second layer with distance between minDist and maxDist to the first layer
       var destinationLayer = null;
@@ -143,9 +145,9 @@
 
       // Set the second parameter "Destination" of "NODE Line" effect
       effect.property(2).setValue(destinationLayer.index);
+      processedLayers.push(destinationLayer.index);
       effect.property(3).setValue(Math.round(Math.random()) + 1);
       effect.property(4).setValue(Math.round(Math.random()) + 1);
-      processedLayers.push(originLayer.index, destinationLayer.index);
     }
     // Select the first layer
     processLayer(app.project.activeItem.selectedLayers[0]);
@@ -153,6 +155,12 @@
     // Duplicate the layer and process the duplicates
     for (var i = 0; i < duplicates; i++) {
       var duplicateLayer = app.project.activeItem.selectedLayers[0].duplicate();
+
+      // Increment all processedLayers indices before processing the duplicated layer
+      for (var j = 0; j < processedLayers.length; j++) {
+        processedLayers[j]++;
+      }
+
       processLayer(duplicateLayer);
     }
   }
