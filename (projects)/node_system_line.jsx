@@ -9,7 +9,7 @@
     undefined,
     "Number of Duplicates:"
   );
-  var duplicatesInput = groupOne.add("edittext", undefined, "60");
+  var duplicatesInput = groupOne.add("edittext", undefined, "400");
   duplicatesInput.characters = 5;
 
   var groupTwo = mainWindow.add("group", undefined, "groupTwo");
@@ -21,13 +21,13 @@
   var groupThree = mainWindow.add("group", undefined, "groupThree");
   groupThree.orientation = "row";
   var minDistLabel = groupThree.add("statictext", undefined, "Min Distance:");
-  var minDistInput = groupThree.add("edittext", undefined, "100");
+  var minDistInput = groupThree.add("edittext", undefined, "10");
   minDistInput.characters = 5;
 
   var groupFour = mainWindow.add("group", undefined, "groupFour");
   groupFour.orientation = "row";
   var maxDistLabel = groupFour.add("statictext", undefined, "Max Distance:");
-  var maxDistInput = groupFour.add("edittext", undefined, "600");
+  var maxDistInput = groupFour.add("edittext", undefined, "300");
   maxDistInput.characters = 5;
 
   var runButton = mainWindow.add("button", undefined, "Run");
@@ -36,6 +36,13 @@
   mainWindow.show();
 
   runButton.onClick = function () {
+    if (app.project.file) {
+      app.project.save(app.project.file);
+    } else {
+      alert("Project must be saved first manually!");
+      return;
+    }
+
     app.beginUndoGroup("Script Execution");
 
     var duplicates = parseInt(duplicatesInput.text);
@@ -46,11 +53,11 @@
     processedLayers = [];
     processLayers(duplicates, maxTries, minDist, maxDist);
 
-    alert(processedLayers);
     app.endUndoGroup();
   };
 
   var processedLayers = []; // Add this line to create a new array for storing processed layers
+  var pairs = [];
 
   function processLayers(duplicates, maxTries, minDist, maxDist) {
     function processLayer(layer) {
@@ -90,6 +97,10 @@
       if (belowLayers.length < 2) {
         alert("Not enough layers below the control layer.");
         return;
+      }
+
+      if (processedLayers.length >= belowLayers.length) {
+        processedLayers = [];
       }
 
       // Select the first layer randomly
@@ -133,21 +144,32 @@
       }
 
       if (!destinationLayer) {
-        alert(
-          "Cannot find a layer with distance between " +
-            minDist +
-            " and " +
-            maxDist +
-            "."
-        );
+        layer.remove();
         return;
       }
 
-      // Set the second parameter "Destination" of "NODE Line" effect
+      var pair = [originLayer.index, destinationLayer.index];
+      pair.sort(function (a, b) {
+        return a - b;
+      });
+
+      // 重複ペアの確認
+      for (var i = 0; i < pairs.length; i++) {
+        if (pairs[i][0] === pair[0] && pairs[i][1] === pair[1]) {
+          // 重複ペアが見つかったらレイヤーを削除
+          layer.remove();
+          return;
+        }
+      }
+
+      // ペアを記録
+      pairs.push(pair);
+
+      // NODE Lineエフェクトの設定
+      effect.property(1).setValue(originLayer.index);
       effect.property(2).setValue(destinationLayer.index);
+      processedLayers.push(originLayer.index);
       processedLayers.push(destinationLayer.index);
-      effect.property(3).setValue(Math.round(Math.random()) + 1);
-      effect.property(4).setValue(Math.round(Math.random()) + 1);
     }
     // Select the first layer
     processLayer(app.project.activeItem.selectedLayers[0]);
