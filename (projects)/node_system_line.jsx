@@ -60,7 +60,7 @@
     }
 
     // ペアのデバッグ出力
-    var userConfirmed = confirm("Created pairs: " + JSON.stringify(pairs));
+    var userConfirmed = confirm("Created pairs: \n" + JSON.stringify(pairs) + "\n\nContinue?");
     if (userConfirmed) {
       // continue with the rest of the code
     } else {
@@ -95,6 +95,9 @@
         );
       }
     }
+  app.disableRendering = false;
+  app.endUndoGroup();
+  alert("Finished.")
   }
 
   function getControlLayerIndex() {
@@ -149,7 +152,4 @@
     }
     return pairs;
   }
-  app.disableRendering = false;
-  app.endUndoGroup();
-  alert("Finished.")
 })();
