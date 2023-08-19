@@ -60,7 +60,9 @@
     }
 
     // ペアのデバッグ出力
-    var userConfirmed = confirm("Created pairs: \n" + JSON.stringify(pairs) + "\n\nContinue?");
+    var userConfirmed = confirm(
+      "Created pairs: \n" + JSON.stringify(pairs) + "\n\nContinue?"
+    );
     if (userConfirmed) {
       // continue with the rest of the code
     } else {
@@ -95,9 +97,9 @@
         );
       }
     }
-  app.disableRendering = false;
-  app.endUndoGroup();
-  alert("Finished.")
+    app.disableRendering = false;
+    app.endUndoGroup();
+    alert("Finished.");
   }
 
   function getControlLayerIndex() {
@@ -133,12 +135,18 @@
     var pairs = [];
     for (var i = 0; i < belowLayersCoordinates.length; i++) {
       var origin = belowLayersCoordinates[i];
+      if (app.project.activeItem.layer(origin.index).nullLayer) continue; // ヌルレイヤーを無視
+
       for (var tries = 0; tries < maxTries; tries++) {
         var destinationIndex = Math.floor(
           Math.random() * belowLayersCoordinates.length
         );
         if (destinationIndex === i) continue; // Skip if selected itself
         var destination = belowLayersCoordinates[destinationIndex];
+        if (app.project.activeItem.layer(destination.index).nullLayer) continue; // ヌルレイヤーを無視
+
+        if (Math.abs(origin.position[0] - destination.position[0]) <= 1)
+          continue; // Skip if X coordinates difference is within 1 pixel
 
         var distance = Math.sqrt(
           Math.pow(origin.position[0] - destination.position[0], 2) +
