@@ -115,6 +115,14 @@
     return controlLayerIndex; // この行を追加
   }
 
+  function getAbsolutePosition(layer) {
+    var parent = layer.parent; // 現在の親を一時保存
+    layer.parent = null; // 一時的に親を解除
+    var position = layer.transform.position.value.slice(); // この時点での位置を取得
+    layer.parent = parent; // 親を再適用
+    return position;
+  }
+
   function getBelowLayersCoordinates(controlLayerIndex) {
     var coordinates = [];
     for (
@@ -123,9 +131,10 @@
       i++
     ) {
       var layer = app.project.activeItem.layer(i);
+      if (layer.nullLayer) continue;
       coordinates.push({
         index: i,
-        position: layer.position.value,
+        position: getAbsolutePosition(layer), // コンポジション座標に変換
       });
     }
     return coordinates;
@@ -135,18 +144,13 @@
     var pairs = [];
     for (var i = 0; i < belowLayersCoordinates.length; i++) {
       var origin = belowLayersCoordinates[i];
-      if (app.project.activeItem.layer(origin.index).nullLayer) continue; // ヌルレイヤーを無視
 
       for (var tries = 0; tries < maxTries; tries++) {
         var destinationIndex = Math.floor(
           Math.random() * belowLayersCoordinates.length
         );
-        if (destinationIndex === i) continue; // Skip if selected itself
+        if (destinationIndex === i) continue; // 自分自身を選ばない
         var destination = belowLayersCoordinates[destinationIndex];
-        if (app.project.activeItem.layer(destination.index).nullLayer) continue; // ヌルレイヤーを無視
-
-        if (Math.abs(origin.position[0] - destination.position[0]) <= 1)
-          continue; // Skip if X coordinates difference is within 1 pixel
 
         var distance = Math.sqrt(
           Math.pow(origin.position[0] - destination.position[0], 2) +
