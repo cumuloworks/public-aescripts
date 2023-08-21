@@ -16,7 +16,7 @@
   var groupTwo = mainWindow.add("group", undefined, "groupTwo");
   groupTwo.orientation = "row";
   var maxTriesLabel = groupTwo.add("statictext", undefined, "Max Tries:");
-  var maxTriesInput = groupTwo.add("edittext", undefined, "120");
+  var maxTriesInput = groupTwo.add("edittext", undefined, "9999");
   maxTriesInput.characters = 5;
 
   var groupThree = mainWindow.add("group", undefined, "groupThree");
@@ -28,7 +28,7 @@
   var groupFour = mainWindow.add("group", undefined, "groupFour");
   groupFour.orientation = "row";
   var maxDistLabel = groupFour.add("statictext", undefined, "Max Distance:");
-  var maxDistInput = groupFour.add("edittext", undefined, "300");
+  var maxDistInput = groupFour.add("edittext", undefined, "250");
   maxDistInput.characters = 5;
 
   var runButton = mainWindow.add("button", undefined, "Run");
@@ -151,6 +151,9 @@
         );
         if (destinationIndex === i) continue; // 自分自身を選ばない
         var destination = belowLayersCoordinates[destinationIndex];
+
+        if (Math.abs(origin.position[0] - destination.position[0]) <= 1)
+          continue; // Skip if X coordinates difference is within 1 pixel
 
         var distance = Math.sqrt(
           Math.pow(origin.position[0] - destination.position[0], 2) +

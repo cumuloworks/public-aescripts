@@ -1,0 +1,46 @@
+function removeDuplicateNodeLines() {
+  var comp = app.project.activeItem;
+  if (!comp || comp.typeName !== "Composition") {
+    alert("Composition is not selected.");
+    return;
+  }
+
+  var selectedLayers = comp.selectedLayers;
+  if (selectedLayers.length === 0) {
+    alert("No layers are selected.");
+    return;
+  }
+
+  var nodeLineSettings = {};
+  var duplicatesToRemove = [];
+
+  app.beginUndoGroup("Remove Duplicate NODE Lines");
+  for (var i = 0; i < selectedLayers.length; i++) {
+    var layer = selectedLayers[i];
+    var effect = layer.effect("NODE Line");
+    if (!effect) continue;
+
+    // Assuming that properties 1 and 2 define the uniqueness of the "NODE Line"
+    var prop1 = effect.property(1).value;
+    var prop2 = effect.property(2).value;
+    var key = prop1 + "," + prop2;
+
+    if (nodeLineSettings[key]) {
+      // If this setting is already found, mark this layer for removal
+      duplicatesToRemove.push(layer);
+    } else {
+      nodeLineSettings[key] = true;
+    }
+  }
+
+  // Remove the marked duplicates
+  for (var j = 0; j < duplicatesToRemove.length; j++) {
+    duplicatesToRemove[j].remove();
+  }
+
+  app.endUndoGroup();
+  alert("Removed " + duplicatesToRemove.length + " duplicate(s).");
+}
+
+// Call the function
+removeDuplicateNodeLines();
